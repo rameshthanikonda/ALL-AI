@@ -1,4 +1,6 @@
-const BACKEND = __APP_BACKEND_URL__ || import.meta.env.VITE_BACKEND_URL || import.meta.env.BACKEND_URL || 'http://localhost:4000'
+import { getBackendUrl } from '../utils/appConfig'
+
+const BACKEND = getBackendUrl()
 
 async function checkRes(res) {
   if (!res.ok) {
@@ -10,7 +12,14 @@ async function checkRes(res) {
   return res.json().catch(() => ({}))
 }
 
+function requireBackendUrl() {
+  if (!BACKEND) {
+    throw new Error('backend_not_configured')
+  }
+}
+
 export async function fetchTools(params = {}) {
+  requireBackendUrl()
   const url = new URL(`${BACKEND}/api/tools`)
   const { q, category, tags, page, perPage } = params
 
@@ -25,21 +34,25 @@ export async function fetchTools(params = {}) {
 }
 
 export async function fetchTool(slug) {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/tools/${slug}`, { credentials: 'include' })
   return checkRes(res)
 }
 
 export async function fetchCategories() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/tools/categories`, { credentials: 'include' })
   return checkRes(res)
 }
 
 export async function fetchPortalOverview() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/portal/overview`, { credentials: 'include' })
   return checkRes(res)
 }
 
 export async function fetchPortalFeed(kind, limit = 12) {
+  requireBackendUrl()
   const url = new URL(`${BACKEND}/api/portal/feed`)
   if (kind) url.searchParams.set('kind', kind)
   if (limit) url.searchParams.set('limit', limit)
@@ -48,11 +61,13 @@ export async function fetchPortalFeed(kind, limit = 12) {
 }
 
 export async function fetchInternshipAutomationStatus() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/portal/internships/status`, { credentials: 'include' })
   return checkRes(res)
 }
 
 export async function refreshInternshipAutomation() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/portal/internships/refresh`, {
     method: 'POST',
     credentials: 'include',
@@ -62,6 +77,7 @@ export async function refreshInternshipAutomation() {
 }
 
 export async function refreshAINewsAutomation() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/portal/news/refresh`, {
     method: 'POST',
     credentials: 'include',
@@ -71,6 +87,7 @@ export async function refreshAINewsAutomation() {
 }
 
 export async function bootstrapPortalContent() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/portal/bootstrap`, {
     method: 'POST',
     credentials: 'include',
@@ -80,6 +97,7 @@ export async function bootstrapPortalContent() {
 }
 
 export async function register({ email, password, displayName }) {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/auth/register`, {
     method: 'POST',
     credentials: 'include',
@@ -90,6 +108,7 @@ export async function register({ email, password, displayName }) {
 }
 
 export async function login({ email, password }) {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/auth/login`, {
     method: 'POST',
     credentials: 'include',
@@ -100,16 +119,19 @@ export async function login({ email, password }) {
 }
 
 export async function logout() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/auth/logout`, { method: 'POST', credentials: 'include' })
   return checkRes(res)
 }
 
 export async function fetchCurrentUser() {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/auth/me`, { credentials: 'include' })
   return checkRes(res)
 }
 
 export async function createTool(tool) {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/tools`, {
     method: 'POST',
     credentials: 'include',
@@ -120,6 +142,7 @@ export async function createTool(tool) {
 }
 
 export async function importTools(payload, options = {}) {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/tools/bulk`, {
     method: 'POST',
     credentials: 'include',
@@ -130,6 +153,7 @@ export async function importTools(payload, options = {}) {
 }
 
 export async function updateTool(slug, updates) {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/tools/${slug}`, {
     method: 'PUT',
     credentials: 'include',
@@ -140,6 +164,7 @@ export async function updateTool(slug, updates) {
 }
 
 export async function deleteTool(slug) {
+  requireBackendUrl()
   const res = await fetch(`${BACKEND}/api/tools/${slug}`, { method: 'DELETE', credentials: 'include' })
   return checkRes(res)
 }

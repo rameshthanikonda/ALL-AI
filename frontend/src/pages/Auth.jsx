@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login, logout, register } from '../services/api'
 import { useUser } from '../contexts/UserContext'
+import { getBackendUrl } from '../utils/appConfig'
 
 function GoogleMark() {
   return (
@@ -29,6 +30,7 @@ function GoogleMark() {
 export default function Auth() {
   const navigate = useNavigate()
   const { refresh, user, loading } = useUser() || {}
+  const backendUrl = getBackendUrl()
   const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -118,14 +120,25 @@ export default function Auth() {
           <button
             type="button"
             onClick={() => {
-              window.location.href = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000') + '/auth/google'
+              if (!backendUrl) {
+                setMsg('Backend URL is not configured for this deployment yet.')
+                return
+              }
+              window.location.href = `${backendUrl}/auth/google`
             }}
+            disabled={!backendUrl}
             className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-300 bg-white px-4 py-3 font-medium text-slate-900 transition hover:border-slate-400 hover:bg-slate-50"
           >
             <GoogleMark />
             Continue with Google
           </button>
         </div>
+
+        {!backendUrl && (
+          <p className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Set `VITE_BACKEND_URL` for the frontend build so Google login and API requests use your deployed backend.
+          </p>
+        )}
 
         <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-slate-400">
           <div className="h-px flex-1 bg-slate-200" />

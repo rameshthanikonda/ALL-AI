@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useUser } from '../contexts/UserContext'
 
@@ -19,6 +19,7 @@ export default function Header() {
   const { user } = useUser() || {}
   const navigate = useNavigate()
   const location = useLocation()
+  const [logoMissing, setLogoMissing] = useState(false)
   const navLinks = user ? privateNavLinks : publicNavLinks
   const isProfileOpen = location.pathname === '/profile'
 
@@ -47,9 +48,23 @@ export default function Header() {
     <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-[1480px] flex-col gap-4 px-4 py-4 sm:px-6 xl:px-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center justify-between gap-4">
-          <Link to="/" className="group" aria-label="Home">
-            <div className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-sky-700">Student AI Tools</div>
-            <div className="font-display text-2xl text-slate-900 transition group-hover:text-sky-700">Build your student edge</div>
+          <Link to="/" className="group flex items-center gap-4" aria-label="Home">
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-sky-100 via-white to-blue-100 shadow-sm">
+              {!logoMissing && (
+                <img
+                  src="/logo.png"
+                  alt="Student AI Tools logo"
+                  className="h-full w-full object-contain p-2"
+                  onError={() => setLogoMissing(true)}
+                />
+              )}
+              {logoMissing && <span className="text-sm font-extrabold uppercase tracking-[0.24em] text-sky-700">SAI</span>}
+            </div>
+
+            <div>
+              <div className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-sky-700">Student AI Tools</div>
+              <div className="font-display text-2xl text-slate-900 transition group-hover:text-sky-700">Build your student edge</div>
+            </div>
           </Link>
 
           <Link
