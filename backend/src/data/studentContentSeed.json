@@ -1,0 +1,72 @@
+[
+  {
+    "kind": "coding_problem",
+    "title": "Arrays and Hashing Starter Sheet",
+    "summary": "A beginner-friendly coding practice track with progressive difficulty.",
+    "description": "Includes common DSA patterns, revision checkpoints, and interview-oriented problem groupings for consistent practice.",
+    "url": "https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/",
+    "source": "cached-coding-feed",
+    "provider": "Student AI Tools",
+    "category": "DSA",
+    "tags": ["coding", "arrays", "hashing"],
+    "difficulty": "Beginner"
+  },
+  {
+    "kind": "coding_problem",
+    "title": "Dynamic Programming Revision Sprint",
+    "summary": "Curated problem ladder for mastering DP patterns.",
+    "description": "Focus on memoization, tabulation, state transitions, and interview-ready explanations.",
+    "url": "https://takeuforward.org/dynamic-programming/striver-dp-series-dynamic-programming-problems",
+    "source": "cached-coding-feed",
+    "provider": "Student AI Tools",
+    "category": "DSA",
+    "tags": ["coding", "dynamic programming", "interview"],
+    "difficulty": "Advanced"
+  },
+  {
+    "kind": "gate_resource",
+    "title": "GATE CSE Complete Revision Roadmap",
+    "summary": "Structured revision roadmap for core GATE subjects.",
+    "description": "Organizes notes, PYQs, mock strategy, and topic priorities for operating systems, DBMS, CN, COA, and algorithms.",
+    "url": "",
+    "source": "cached-gate-feed",
+    "provider": "Student AI Tools",
+    "category": "GATE CSE",
+    "tags": ["gate", "cse", "revision"],
+    "difficulty": "Intermediate"
+  },
+  {
+    "kind": "gate_resource",
+    "title": "GATE Aptitude Quick Revision Pack",
+    "summary": "Short revision pack for aptitude and engineering mathematics.",
+    "description": "Daily revision capsules, formulas, and mock recommendations for boosting easy-score sections.",
+    "url": "",
+    "source": "cached-gate-feed",
+    "provider": "Student AI Tools",
+    "category": "GATE Common",
+    "tags": ["gate", "aptitude", "maths"],
+    "difficulty": "Beginner"
+  },
+  {
+    "kind": "ai_news",
+    "title": "AI News Weekly for Students",
+    "summary": "Key AI product, research, and startup updates simplified for students.",
+    "description": "Summaries of important AI launches, model updates, and industry shifts with practical relevance for learning and careers.",
+    "url": "",
+    "source": "cached-news-feed",
+    "provider": "Student AI Tools",
+    "category": "AI News",
+    "tags": ["ai", "news", "weekly"]
+  },
+  {
+    "kind": "dashboard_card",
+    "title": "Student Weekly Planning Dashboard",
+    "summary": "A single place to track study, coding, applications, and discoveries.",
+    "description": "Combines your weekly coding focus, application queue, GATE study priorities, and new tools to explore.",
+    "url": "",
+    "source": "cached-dashboard-feed",
+    "provider": "Student AI Tools",
+    "category": "Dashboard",
+    "tags": ["dashboard", "planning", "student"]
+  }
+]

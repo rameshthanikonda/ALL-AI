@@ -1,0 +1,49 @@
+{
+  "name": "ai-tools-backend",
+  "version": "0.1.0",
+  "main": "src/server.js",
+  "dependencies": {
+    "express": "4.18.2",
+    "mongoose": "7.3.1",
+    "cors": "2.8.5",
+    "dotenv": "16.0.3",
+    "bcrypt": "5.1.0",
+    "express-session": "1.17.3",
+    "connect-mongo": "5.0.0",
+    "passport": "0.6.0",
+    "passport-google-oauth20": "2.0.0",
+    "passport-local": "1.0.0",
+    "axios": "^1.5.0",
+    "csv-parse": "^5.3.6",
+    "node-cron": "^3.0.2",
+    "cheerio": "^1.0.0-rc.12",
+    "rss-parser": "^3.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.22",
+    "jest": "29.6.1",
+    "supertest": "^6.3.3",
+    "mongodb-memory-server": "8.12.1",
+    "prettier": "2.8.8",
+    "cross-env": "7.0.3"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globalSetup": "<rootDir>/tests/jest.setup.js",
+    "testTimeout": 20000
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/scripts/seed.js",
+    "importer": "node src/scripts/autoImport.js",
+    "portal:bootstrap": "node src/scripts/runStudentAutomation.js",
+    "portal:schedule": "node src/scripts/runStudentAutomation.js --watch",
+    "internships:run": "node src/scripts/runInternshipAutomation.js",
+    "internships:schedule": "node src/scripts/runInternshipAutomation.js --watch",
+    "news:run": "node src/scripts/runAINewsAutomation.js",
+    "news:schedule": "node src/scripts/runAINewsAutomation.js --watch",
+    "test": "cross-env NODE_ENV=test jest --runInBand || jest --runInBand",
+    "format": "prettier --write ."
+  }
+}

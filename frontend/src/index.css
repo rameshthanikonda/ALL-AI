@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-main: #f6f7fb;
+  --bg-soft: #eef2ff;
+  --ink: #0f172a;
+  --muted: #475569;
+  --line: rgba(148, 163, 184, 0.26);
+  --shadow-soft: 0 18px 50px rgba(15, 23, 42, 0.08);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.16), transparent 28%),
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 24%),
+    linear-gradient(180deg, #fbfcff 0%, var(--bg-main) 100%);
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+  letter-spacing: -0.03em;
+}
+
+.bg-site {
+  position: relative;
+  overflow-x: clip;
+}
+
+.site-orb {
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.6;
+}
+
+.site-orb-left {
+  top: 4rem;
+  left: -6rem;
+  width: 18rem;
+  height: 18rem;
+  background: rgba(96, 165, 250, 0.18);
+}
+
+.site-orb-right {
+  right: -7rem;
+  top: 18rem;
+  width: 22rem;
+  height: 22rem;
+  background: rgba(45, 212, 191, 0.16);
+}
+
+.page-enter {
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 420ms ease-out both;
+}
+
+.surface-card {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
+}
+
+.section-shell {
+  border-radius: 2rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
+}
+
+.hero-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-panel::after {
+  content: '';
+  position: absolute;
+  inset: auto -10% -40% auto;
+  width: 16rem;
+  height: 16rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.35), transparent 70%);
+}
+
+/* Light sweep effect for tool cards */
+.tool-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 55%, rgba(255,255,255,0) 100%);
+  transform: rotate(25deg) translateX(-100%);
+  pointer-events: none;
+  animation: sweep 5s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes sweep {
+  0% { transform: rotate(25deg) translateX(-100%); }
+  50% { transform: rotate(25deg) translateX(10%); }
+  100% { transform: rotate(25deg) translateX(120%); }
+}
+
+/* Outer animated colored border */
+.tool-card-outer {
+  border-radius: 1.25rem;
+  padding: 2px; /* space for the colored border */
+  background: linear-gradient(90deg, rgba(96,165,250,0.18) 0%, rgba(45,212,191,0.12) 100%);
+  background-size: 300% 300%;
+  animation: borderShift 8s linear infinite;
+}
+
+.tool-card-outer .tool-card {
+  border-radius: 1rem;
+  background-clip: padding-box;
+}
+
+@keyframes borderShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.tool-card-outer:hover {
+  filter: brightness(1.03);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
