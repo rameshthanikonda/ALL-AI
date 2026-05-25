@@ -23,6 +23,10 @@ function buildAllowedOrigins() {
   return Array.from(new Set(configured.concat(defaults)))
 }
 
+function isSecureOrigin(url) {
+  return String(url || '').trim().toLowerCase().startsWith('https://')
+}
+
 async function createApp() {
   let sessionMongoUrl = process.env.MONGO_URI || 'mongodb://localhost:27017/ai-tools'
 
@@ -44,6 +48,12 @@ async function createApp() {
 
   const app = express()
   const allowedOrigins = buildAllowedOrigins()
+  const hasSecureFrontend = allowedOrigins.some((origin) => isSecureOrigin(origin))
+
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1)
+  }
+
   app.use(
     cors({
       origin(origin, callback) {
@@ -65,7 +75,11 @@ async function createApp() {
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({ mongoUrl: sessionMongoUrl }),
-      cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, sameSite: 'lax' },
+      cookie: {
+        secure: process.env.NODE_ENV === 'production' || hasSecureFrontend,
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' || hasSecureFrontend ? 'none' : 'lax',
+      },
     })
   )
 

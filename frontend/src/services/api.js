@@ -1,4 +1,4 @@
-const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000'
+const BACKEND = __APP_BACKEND_URL__ || import.meta.env.VITE_BACKEND_URL || import.meta.env.BACKEND_URL || 'http://localhost:4000'
 
 async function checkRes(res) {
   if (!res.ok) {
