@@ -4,6 +4,8 @@ const configuredBackendUrl =
 const configuredFrontendUrl =
   __APP_FRONTEND_URL__ || import.meta.env.VITE_FRONTEND_URL || import.meta.env.FRONTEND_URL || ''
 
+const productionBackendUrl = 'https://student-ai-d8qu.onrender.com'
+
 function isLocalHost(hostname) {
   return hostname === 'localhost' || hostname === '127.0.0.1'
 }
@@ -20,7 +22,7 @@ export function getBackendUrl() {
     return 'http://localhost:4000'
   }
 
-  return ''
+  return productionBackendUrl
 }
 
 export function getFrontendUrl() {
