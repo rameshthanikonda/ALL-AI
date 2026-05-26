@@ -79,6 +79,8 @@ async function createApp() {
         secure: process.env.NODE_ENV === 'production' || hasSecureFrontend,
         httpOnly: true,
         sameSite: process.env.NODE_ENV === 'production' || hasSecureFrontend ? 'none' : 'lax',
+        partitioned: process.env.NODE_ENV === 'production' || hasSecureFrontend,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       },
     })
   )

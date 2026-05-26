@@ -16,7 +16,18 @@ export function UserProvider({ children }){
     setLoading(false)
   }
 
-  useEffect(()=>{ refresh() }, [])
+  useEffect(()=>{
+    // Check if redirected back from Google OAuth
+    const params = new URLSearchParams(window.location.search)
+    if(params.has('authSuccess') || params.has('authError')){
+      // Clean up the URL query params
+      const url = new URL(window.location.href)
+      url.searchParams.delete('authSuccess')
+      url.searchParams.delete('authError')
+      window.history.replaceState({}, '', url.pathname)
+    }
+    refresh()
+  }, [])
 
   return (
     <UserContext.Provider value={{ user, loading, refresh }}>

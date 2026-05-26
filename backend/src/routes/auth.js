@@ -99,7 +99,7 @@ if(googleConfigured){
           return res.redirect(`${frontend}/?authError=login_failed`)
         }
         // success
-        return res.redirect(frontend)
+        return res.redirect(`${frontend}/?authSuccess=1`)
       })
     })(req,res,next)
   })
