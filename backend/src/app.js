@@ -50,7 +50,7 @@ async function createApp() {
   const allowedOrigins = buildAllowedOrigins()
   const hasSecureFrontend = allowedOrigins.some((origin) => isSecureOrigin(origin))
 
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' || hasSecureFrontend) {
     app.set('trust proxy', 1)
   }
 
