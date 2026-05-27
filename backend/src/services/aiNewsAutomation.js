@@ -12,6 +12,9 @@ const DEFAULT_NEWS_SOURCES = [
   { name: 'Google AI Blog', type: 'rss', url: 'https://blog.google/technology/ai/rss/' },
   { name: 'Hugging Face Blog', type: 'rss', url: 'https://huggingface.co/blog/feed.xml' },
   { name: 'Anthropic News', type: 'scrape', url: 'https://www.anthropic.com/news' },
+  { name: 'NVIDIA AI News', type: 'rss', url: 'https://blogs.nvidia.com/feed/' },
+  { name: 'Microsoft AI Blog', type: 'rss', url: 'https://blogs.microsoft.com/ai/feed/' },
+  { name: 'Meta AI News', type: 'scrape', url: 'https://ai.meta.com/blog/' },
 ]
 
 function readNewsSources() {

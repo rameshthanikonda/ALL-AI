@@ -18,9 +18,21 @@ import ToolDetail from './pages/ToolDetail'
 import ToolsList from './pages/ToolsList'
 import AdminImport from './pages/AdminImport'
 import AdminReview from './pages/AdminReview'
+import Toast from './components/Toast'
 
 export default function App() {
   const location = useLocation()
+  const [showToast, setShowToast] = React.useState(false)
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('authSuccess') === '1') {
+      setShowToast(true)
+      // Clean up the URL
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, '', newUrl)
+    }
+  }, [location])
 
   return (
     <div className="min-h-screen bg-site text-slate-900">
@@ -50,6 +62,7 @@ export default function App() {
         </div>
       </main>
       {location.pathname === '/' && <Footer />}
+      {showToast && <Toast message="Successfully logged in!" onClose={() => setShowToast(false)} />}
     </div>
   )
 }

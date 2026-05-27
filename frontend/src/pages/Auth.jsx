@@ -57,7 +57,7 @@ export default function Auth() {
       }
 
       await refresh?.()
-      navigate('/profile')
+      navigate('/?authSuccess=1', { replace: true })
     } catch (err) {
       setMsg(err.body?.error || err.message || 'failed')
     } finally {

@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Tool = require('../models/Tool')
 const { meiliSearchClient } = require('../search/meiliSearch')
+const { performLiveFallbackSearch } = require('../search/liveSearch')
 
 const PRIORITY_TOOL_ORDER = [
   'Windsurf',
@@ -134,36 +135,70 @@ router.get('/', async (req, res) => {
       await meiliSearchClient.syncIfNeeded(tools)
       const searchResult = await meiliSearchClient.search({ query: q, category, tags, page, perPage })
       if (searchResult) {
+        let finalTools = searchResult.tools
+        let finalTotal = searchResult.total
+        let searchMetadata = {
+          engine: 'Meilisearch',
+          strategy: q
+            ? 'Keyword search across name, description, category, and tags'
+            : 'Simple browse ranking',
+          query: q,
+          filters: { category, tags },
+        }
+
+        if (finalTotal === 0 && q) {
+          const liveResults = await performLiveFallbackSearch(q)
+          if (liveResults.length > 0) {
+            finalTools = liveResults
+            finalTotal = liveResults.length
+            searchMetadata = {
+              engine: 'Live Web Search',
+              strategy: 'Real-time scraping fallback',
+              query: q,
+              filters: { category, tags }
+            }
+          }
+        }
+
         return res.json({
-          tools: searchResult.tools,
-          total: searchResult.total,
+          tools: finalTools,
+          total: finalTotal,
           facets,
-          search: {
-            engine: 'Meilisearch',
-            strategy: q
-              ? 'Keyword search across name, description, category, and tags'
-              : 'Simple browse ranking',
-            query: q,
-            filters: { category, tags },
-          },
+          search: searchMetadata,
         })
       }
     }
 
-    const fallbackResult = applyFallbackSearch(tools, { query: q, category, tags, page, perPage })
+    let finalTools = fallbackResult.tools
+    let finalTotal = fallbackResult.total
+    let searchMetadata = {
+      engine: 'Database fallback',
+      strategy: q
+        ? 'Basic keyword search across name, description, category, and tags'
+        : 'Simple browse ranking',
+      query: q,
+      filters: { category, tags },
+    }
+
+    if (finalTotal === 0 && q) {
+      const liveResults = await performLiveFallbackSearch(q)
+      if (liveResults.length > 0) {
+        finalTools = liveResults
+        finalTotal = liveResults.length
+        searchMetadata = {
+          engine: 'Live Web Search',
+          strategy: 'Real-time scraping fallback',
+          query: q,
+          filters: { category, tags }
+        }
+      }
+    }
 
     res.json({
-      tools: fallbackResult.tools,
-      total: fallbackResult.total,
+      tools: finalTools,
+      total: finalTotal,
       facets,
-      search: {
-        engine: 'Database fallback',
-        strategy: q
-          ? 'Basic keyword search across name, description, category, and tags'
-          : 'Simple browse ranking',
-        query: q,
-        filters: { category, tags },
-      },
+      search: searchMetadata,
     })
   } catch (err) {
     console.error(err)
