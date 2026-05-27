@@ -8,6 +8,13 @@ async function startServer() {
     const app = await createApp()
     const server = app.listen(preferredPort, () => {
       console.log(`Backend listening on port ${preferredPort}`)
+
+      // Initialize the scraping and trending cron scheduler
+      if (process.env.NODE_ENV !== 'test') {
+        const { startScheduler } = require('./automation/scheduler/cronScheduler')
+        const runImmediately = process.env.RUN_SCRAPERS_ON_START === 'true'
+        startScheduler({ runImmediately })
+      }
     })
 
     server.on('error', (err) => {
