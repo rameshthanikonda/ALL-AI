@@ -51,13 +51,6 @@ export default function Internships() {
   const [activeFilter, setActiveFilter] = useState(30)
 
   useEffect(() => {
-    if (user) return
-    window.alert('Please login to access Internships.')
-    navigate('/auth')
-  }, [navigate, user])
-
-  useEffect(() => {
-    if (!user) return undefined
     let mounted = true
 
     fetchInternshipAutomationStatus()
@@ -74,9 +67,7 @@ export default function Internships() {
     return () => {
       mounted = false
     }
-  }, [user])
-
-  if (!user) return null
+  }, [])
 
   const filteredItems = items.filter((item) => {
     if (!item.publishedAt) return true

@@ -4,8 +4,9 @@ import { useUser } from '../contexts/UserContext'
 
 const publicNavLinks = [
   { to: '/tools', label: 'Explore Tools' },
-  { to: '/internships', label: 'Internships', requiresAuth: true },
-  { to: '/coding', label: 'Coding', requiresAuth: true },
+  { to: '/internships', label: 'Internships' },
+  { to: '/coding', label: 'Coding' },
+  { to: '/news', label: 'AI News' },
 ]
 
 const privateNavLinks = [

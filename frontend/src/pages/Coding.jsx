@@ -263,14 +263,6 @@ export default function Coding() {
   const { user } = useUser() || {}
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (user) return
-    window.alert('Please login to access Coding.')
-    navigate('/auth')
-  }, [navigate, user])
-
-  if (!user) return null
-
   return (
     <div className="space-y-8">
       <section className="hero-panel overflow-hidden rounded-[2rem] border border-slate-900/80 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-900 px-8 py-12 text-white shadow-xl lg:px-12">

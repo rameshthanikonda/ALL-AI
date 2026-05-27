@@ -144,17 +144,29 @@ export default function Home() {
           </section>
 
           <section className="section-shell p-8">
-            <div className="text-sm font-medium uppercase tracking-[0.18em] text-slate-400">Member Access</div>
-            <h3 className="font-display mt-3 text-2xl text-slate-900">Login to unlock internships, coding, and AI news.</h3>
+            <div className="text-sm font-medium uppercase tracking-[0.18em] text-sky-700">Student Resources</div>
+            <h3 className="font-display mt-3 text-2xl text-slate-900">Explore internships, coding preparation, and daily AI news.</h3>
             <p className="mt-4 text-sm leading-7 text-slate-600">
-              Before login the homepage promotes your tool directory. After login, users can access the remaining student sections.
+              Find curated internships, prepare for software engineering interviews across top companies, and stay updated with automated AI news. Login is optional but unlocks personalized features.
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                to="/auth"
-                className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-blue-700"
+                to="/internships"
+                className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
               >
-                Login
+                Explore Internships
+              </Link>
+              <Link
+                to="/coding"
+                className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50"
+              >
+                Coding Preparation
+              </Link>
+              <Link
+                to="/news"
+                className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50"
+              >
+                AI News
               </Link>
             </div>
           </section>
