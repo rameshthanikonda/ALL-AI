@@ -1,9 +1,11 @@
 const cron = require('node-cron')
 const { runFullPipeline, runSelectedScrapers } = require('../pipeline/scrapingPipeline')
 const { calculateTrendingScores } = require('../processors/trendingCalculator')
+const { cleanupExpiredJobs } = require('../../scripts/cleanupJobs')
 
 let scrapingTask = null
 let trendingTask = null
+let cleanupTask = null
 
 /**
  * Start the scraping cron scheduler.
@@ -14,6 +16,7 @@ function startScheduler(options = {}) {
   const {
     scrapingCron = '0 */6 * * *', // Every 6 hours (at minute 0)
     trendingCron = '0 */3 * * *', // Every 3 hours
+    cleanupCron = '0 0 * * *', // Every midnight
     runImmediately = false,
   } = options
 
@@ -51,6 +54,16 @@ function startScheduler(options = {}) {
     }
   }, { timezone: 'Asia/Kolkata' })
 
+  // Schedule job cleanup
+  cleanupTask = cron.schedule(cleanupCron, async () => {
+    console.log(`\n[Scheduler] ⏰ Job cleanup triggered at ${new Date().toISOString()}`)
+    try {
+      await cleanupExpiredJobs()
+    } catch (err) {
+      console.error('[Scheduler] Job cleanup failed:', err.message)
+    }
+  }, { timezone: 'Asia/Kolkata' })
+
   console.log('[Scheduler] ✅ Cron jobs registered successfully.')
 
   // Run immediately if requested (e.g., first deployment)
@@ -79,6 +92,11 @@ function stopScheduler() {
     trendingTask.stop()
     trendingTask = null
     console.log('[Scheduler] Trending cron stopped.')
+  }
+  if (cleanupTask) {
+    cleanupTask.stop()
+    cleanupTask = null
+    console.log('[Scheduler] Cleanup cron stopped.')
   }
 }
 

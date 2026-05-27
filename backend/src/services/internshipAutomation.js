@@ -5,10 +5,48 @@ const ContentItem = require('../models/ContentItem')
 const { normalizeContentItem, slugify, normalizeText } = require('./contentNormalizer')
 
 const DEFAULT_SOURCES = [
+  // Job Portals & Aggregators
   { name: 'Internshala', type: 'internship', url: 'https://internshala.com/internships/' },
   { name: 'Naukri', type: 'job', url: 'https://www.naukri.com/' },
-  { name: 'LinkedIn Jobs', type: 'job', url: 'https://www.linkedin.com/jobs/' },
+  { name: 'LinkedIn Jobs', type: 'job', url: 'https://www.linkedin.com/jobs/software-engineer-jobs/' },
   { name: 'Unstop', type: 'internship', url: 'https://unstop.com/internships' },
+  { name: 'Wellfound Engineering', type: 'job', url: 'https://wellfound.com/jobs' },
+  { name: 'Indeed Software Jobs', type: 'job', url: 'https://in.indeed.com/jobs?q=software+engineer+fresher' },
+
+  // Big Tech
+  { name: 'Google Careers', type: 'job', url: 'https://www.google.com/about/careers/applications/jobs/results' },
+  { name: 'Microsoft Students', type: 'internship', url: 'https://careers.microsoft.com/v2/global/en/programs/students.html' },
+  { name: 'Amazon Jobs', type: 'job', url: 'https://www.amazon.jobs/en/teams/internships-for-students' },
+  { name: 'Adobe University', type: 'job', url: 'https://careers.adobe.com/us/en/university' },
+  { name: 'Meta Careers', type: 'job', url: 'https://www.metacareers.com/jobs' },
+  { name: 'Apple Jobs', type: 'job', url: 'https://jobs.apple.com/en-us/search' },
+  { name: 'NVIDIA Careers', type: 'job', url: 'https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite' },
+  { name: 'Oracle Careers', type: 'job', url: 'https://careers.oracle.com/jobs/' },
+  { name: 'Salesforce Careers', type: 'job', url: 'https://careers.salesforce.com/en/jobs/' },
+
+  // Retail & Consumer
+  { name: 'Walmart Careers', type: 'job', url: 'https://careers.walmart.com/technology' },
+  { name: 'Flipkart Careers', type: 'job', url: 'https://www.flipkartcareers.com/' },
+  { name: 'Samsung Careers', type: 'job', url: 'https://www.samsung.com/in/about-us/careers/' },
+
+  // Hardware & Electronics
+  { name: 'Dell Careers', type: 'job', url: 'https://jobs.dell.com/' },
+
+  // Finance & Consulting
+  { name: 'Goldman Sachs Careers', type: 'job', url: 'https://www.goldmansachs.com/careers/students/' },
+  { name: 'PayPal Careers', type: 'job', url: 'https://careers.pypl.com/home/' },
+  { name: 'Deloitte Careers', type: 'job', url: 'https://apply.deloitte.com/' },
+
+  // Indian IT Services
+  { name: 'TCS Careers', type: 'job', url: 'https://www.tcs.com/careers' },
+  { name: 'Infosys Careers', type: 'job', url: 'https://www.infosys.com/careers/' },
+  { name: 'Cognizant Careers', type: 'job', url: 'https://careers.cognizant.com/' },
+  { name: 'Wipro Careers', type: 'job', url: 'https://careers.wipro.com/' },
+  { name: 'HCLTech Careers', type: 'job', url: 'https://www.hcltech.com/careers' },
+
+  // Startups & Transport
+  { name: 'Uber Careers', type: 'job', url: 'https://www.uber.com/us/en/careers/' },
+  { name: 'Graviton Research', type: 'job', url: 'https://graviton.in/careers' },
 ]
 
 function readSources() {

@@ -169,6 +169,7 @@ router.get('/', async (req, res) => {
       }
     }
 
+    const fallbackResult = applyFallbackSearch(tools, { query: q, category, tags, page, perPage })
     let finalTools = fallbackResult.tools
     let finalTotal = fallbackResult.total
     let searchMetadata = {

@@ -4,16 +4,48 @@ import { useUser } from '../contexts/UserContext'
 import { fetchInternshipAutomationStatus } from '../services/api'
 
 const internshipAndJobLinks = [
+  // Job Portals
   { name: 'Internshala Tech', url: 'https://internshala.com/internships/computer-science-internship', description: 'Tech internships for software development, web, app, data, and testing roles.' },
   { name: 'LinkedIn Software Jobs', url: 'https://www.linkedin.com/jobs/software-engineer-jobs/', description: 'Software engineer, developer, QA, support, and related computer science roles.' },
   { name: 'Naukri IT Jobs', url: 'https://www.naukri.com/information-technology-jobs', description: 'India-focused IT openings for developers, analysts, testers, and support engineers.' },
   { name: 'Unstop Tech Internships', url: 'https://unstop.com/internships?domain=Computer%20Science', description: 'Tech internships, hackathon-linked openings, and student hiring programs.' },
   { name: 'Wellfound Engineering Jobs', url: 'https://wellfound.com/jobs', description: 'Startup jobs for software engineering, backend, frontend, full-stack, and product-tech roles.' },
   { name: 'Indeed Software Jobs', url: 'https://in.indeed.com/jobs?q=software+engineer+fresher', description: 'Quick access to fresher software engineer and developer searches in India.' },
+
+  // Big Tech
   { name: 'Google Careers', url: 'https://www.google.com/about/careers/applications/jobs/results', description: 'Official student and engineering openings across software, systems, data, and research.' },
   { name: 'Microsoft Students', url: 'https://careers.microsoft.com/v2/global/en/programs/students.html', description: 'Student internships and new-grad hiring for software engineering and related tech tracks.' },
   { name: 'Amazon Jobs', url: 'https://www.amazon.jobs/en/teams/internships-for-students', description: 'Student programs and technical hiring for SDE, support, cloud, and operations engineering.' },
   { name: 'Adobe University', url: 'https://careers.adobe.com/us/en/university', description: 'University hiring for software engineering, product development, and platform roles.' },
+  { name: 'Meta Careers', url: 'https://www.metacareers.com/jobs', description: 'Engineering and product roles at Meta across AR/VR, AI, infrastructure, and social platforms.' },
+  { name: 'Apple Jobs', url: 'https://jobs.apple.com/en-us/search', description: 'Software engineering, hardware, ML, and internship openings at Apple worldwide.' },
+  { name: 'NVIDIA Careers', url: 'https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite', description: 'GPU, AI, deep learning, and systems engineering roles at NVIDIA.' },
+  { name: 'Oracle Careers', url: 'https://careers.oracle.com/jobs/', description: 'Cloud, database, and enterprise software engineering roles at Oracle.' },
+  { name: 'Salesforce Careers', url: 'https://careers.salesforce.com/en/jobs/', description: 'CRM, cloud platform, and AI engineering roles at Salesforce.' },
+
+  // Retail & Consumer
+  { name: 'Walmart Tech', url: 'https://careers.walmart.com/technology', description: 'Technology and engineering roles at Walmart including e-commerce, data, and supply chain.' },
+  { name: 'Flipkart Careers', url: 'https://www.flipkartcareers.com/', description: 'Engineering, data science, and product roles at India\'s leading e-commerce company.' },
+  { name: 'Samsung Careers', url: 'https://www.samsung.com/in/about-us/careers/', description: 'R&D, software, and hardware engineering roles at Samsung India.' },
+
+  // Hardware & Electronics
+  { name: 'Dell Careers', url: 'https://jobs.dell.com/', description: 'Software, infrastructure, cloud, and support engineering roles at Dell Technologies.' },
+
+  // Finance & Consulting
+  { name: 'Goldman Sachs Students', url: 'https://www.goldmansachs.com/careers/students/', description: 'Student programs, internships, and new analyst roles in engineering and technology.' },
+  { name: 'PayPal Careers', url: 'https://careers.pypl.com/home/', description: 'Fintech engineering, payments, and platform roles at PayPal.' },
+  { name: 'Deloitte Careers', url: 'https://apply.deloitte.com/', description: 'Technology consulting, cyber, analytics, and engineering roles at Deloitte.' },
+
+  // Indian IT Services
+  { name: 'TCS Careers', url: 'https://www.tcs.com/careers', description: 'Campus hiring, NQT, and IT services roles at Tata Consultancy Services.' },
+  { name: 'Infosys Careers', url: 'https://www.infosys.com/careers/', description: 'InfyTQ, campus hiring, and IT consulting roles at Infosys.' },
+  { name: 'Cognizant Careers', url: 'https://careers.cognizant.com/', description: 'IT services, digital engineering, and GenC hiring programs at Cognizant.' },
+  { name: 'Wipro Careers', url: 'https://careers.wipro.com/', description: 'Elite NLTH, campus hiring, and technology roles at Wipro.' },
+  { name: 'HCLTech Careers', url: 'https://www.hcltech.com/careers', description: 'Engineering, cloud, and digital services roles at HCLTech.' },
+
+  // Startups & Transport
+  { name: 'Uber Careers', url: 'https://www.uber.com/us/en/careers/', description: 'Engineering, ML, and platform roles at Uber across mobility and delivery.' },
+  { name: 'Graviton Research', url: 'https://graviton.in/careers', description: 'Quantitative research and technology roles at Graviton.' },
 ]
 
 function OpportunityCard({ item }) {
