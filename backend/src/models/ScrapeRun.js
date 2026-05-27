@@ -1,19 +1,23 @@
 const mongoose = require('mongoose')
 
+const ScraperResultSchema = new mongoose.Schema({
+  source: { type: String, required: true },
+  fetched: { type: Number, default: 0 },
+  newTools: { type: Number, default: 0 },
+  duplicates: { type: Number, default: 0 },
+  errors: { type: Number, default: 0 },
+  duration: { type: Number, default: 0 }, // milliseconds
+  errorMessages: [{ type: String }],
+}, {
+  suppressReservedKeysWarning: true
+})
+
 const ScrapeRunSchema = new mongoose.Schema({
   pipeline: { type: String, default: 'scraping-automation', index: true },
   startedAt: { type: Date, default: Date.now },
   finishedAt: { type: Date, default: null },
   status: { type: String, enum: ['running', 'completed', 'failed', 'partial'], default: 'running' },
-  scraperResults: [{
-    source: { type: String, required: true },
-    fetched: { type: Number, default: 0 },
-    newTools: { type: Number, default: 0 },
-    duplicates: { type: Number, default: 0 },
-    errors: { type: Number, default: 0 },
-    duration: { type: Number, default: 0 }, // milliseconds
-    errorMessages: [{ type: String }],
-  }],
+  scraperResults: [ScraperResultSchema],
   stats: {
     totalFetched: { type: Number, default: 0 },
     totalNew: { type: Number, default: 0 },
@@ -24,6 +28,8 @@ const ScrapeRunSchema = new mongoose.Schema({
     trendingUpdated: { type: Number, default: 0 },
   },
   notes: [{ type: String }],
+}, {
+  suppressReservedKeysWarning: true
 })
 
 ScrapeRunSchema.index({ startedAt: -1 })

@@ -15,15 +15,16 @@ function normalizeUrl(value) {
 }
 
 export function getBackendUrl() {
+  const normalized = normalizeUrl(configuredBackendUrl)
+  if (normalized) return normalized
+
   // On localhost, use the local backend directly
   if (typeof window !== 'undefined' && isLocalHost(window.location.hostname)) {
-    const normalized = normalizeUrl(configuredBackendUrl)
-    return normalized || 'http://localhost:4000'
+    return 'http://localhost:4000'
   }
 
-  // In production (deployed), use empty string = same origin
-  // Netlify proxy will forward /api/* and /auth/* to the backend
-  return ''
+  // In production (deployed), use the production backend URL
+  return productionBackendUrl
 }
 
 export function getFrontendUrl() {
