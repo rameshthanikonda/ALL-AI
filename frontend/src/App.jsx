@@ -19,20 +19,24 @@ import ToolsList from './pages/ToolsList'
 import AdminImport from './pages/AdminImport'
 import AdminReview from './pages/AdminReview'
 import Toast from './components/Toast'
+import { useUser } from './contexts/UserContext'
 
 export default function App() {
   const location = useLocation()
+  const { refresh } = useUser() || {}
   const [showToast, setShowToast] = React.useState(false)
 
   React.useEffect(() => {
     const params = new URLSearchParams(location.search)
     if (params.get('authSuccess') === '1') {
+      // Re-fetch user session so the header updates immediately
+      if (refresh) refresh()
       setShowToast(true)
       // Clean up the URL
       const newUrl = window.location.pathname
       window.history.replaceState({}, '', newUrl)
     }
-  }, [location])
+  }, [location, refresh])
 
   return (
     <div className="min-h-screen bg-site text-slate-900">

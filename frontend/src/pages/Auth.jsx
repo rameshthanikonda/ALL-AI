@@ -38,11 +38,13 @@ export default function Auth() {
   const [msg, setMsg] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  const [justLoggedIn, setJustLoggedIn] = React.useState(false)
+
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !justLoggedIn) {
       navigate('/profile', { replace: true })
     }
-  }, [loading, user, navigate])
+  }, [loading, user, navigate, justLoggedIn])
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -56,6 +58,7 @@ export default function Auth() {
         await register({ email, password, displayName })
       }
 
+      setJustLoggedIn(true)
       await refresh?.()
       navigate('/?authSuccess=1', { replace: true })
     } catch (err) {

@@ -17,15 +17,6 @@ export function UserProvider({ children }){
   }
 
   useEffect(()=>{
-    // Check if redirected back from Google OAuth
-    const params = new URLSearchParams(window.location.search)
-    if(params.has('authSuccess') || params.has('authError')){
-      // Clean up the URL query params
-      const url = new URL(window.location.href)
-      url.searchParams.delete('authSuccess')
-      url.searchParams.delete('authError')
-      window.history.replaceState({}, '', url.pathname)
-    }
     refresh()
   }, [])
 
