@@ -62,7 +62,20 @@ export default function Auth() {
       await refresh?.()
       navigate('/?authSuccess=1', { replace: true })
     } catch (err) {
-      setMsg(err.body?.error || err.message || 'failed')
+      const errorMsg = err.body?.error || err.message || ''
+      let friendlyMsg = 'An unexpected error occurred. Please try again.'
+      if (errorMsg === 'invalid_credentials') {
+        friendlyMsg = 'Incorrect email or password. Please verify your details and try again.'
+      } else if (errorMsg === 'email_exists') {
+        friendlyMsg = 'An account with this email address already exists. Please login instead.'
+      } else if (errorMsg === 'missing_fields') {
+        friendlyMsg = 'Please fill in all required email and password fields.'
+      } else if (errorMsg === 'fetch_failed' || errorMsg.includes('fetch') || errorMsg.includes('NetworkError')) {
+        friendlyMsg = 'Unable to contact the server. Please check your network connection and try again.'
+      } else if (errorMsg) {
+        friendlyMsg = errorMsg
+      }
+      setMsg(friendlyMsg)
     } finally {
       setSubmitting(false)
     }

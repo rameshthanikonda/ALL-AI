@@ -126,7 +126,7 @@ router.get('/', async (req, res) => {
     const category = String(req.query.category || '').trim()
     const tags = parseTags(req.query.tags)
     const page = Math.max(1, Number(req.query.page) || 1)
-    const perPage = Math.min(50, Math.max(1, Number(req.query.perPage) || 20))
+    const perPage = Math.min(500, Math.max(1, Number(req.query.perPage) || 20))
 
     const tools = await Tool.find({}).lean()
     const facets = buildFacets(tools)

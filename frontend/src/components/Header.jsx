@@ -50,12 +50,12 @@ export default function Header() {
       <div className="mx-auto flex w-full max-w-[1480px] flex-col gap-4 px-4 py-4 sm:px-6 xl:px-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center justify-between gap-4">
           <Link to="/" className="group flex items-center gap-4" aria-label="Home">
-            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-sky-100 via-white to-blue-100 shadow-sm">
+            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-transform duration-300 group-hover:scale-105">
               {!logoMissing && (
                 <img
                   src="/logo.png"
                   alt="Student AI Tools logo"
-                  className="h-full w-full object-contain p-2"
+                  className="h-full w-full object-contain p-1"
                   onError={() => setLogoMissing(true)}
                 />
               )}
@@ -63,8 +63,8 @@ export default function Header() {
             </div>
 
             <div>
-              <div className="text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-sky-700">Student AI Tools</div>
-              <div className="font-display text-2xl text-slate-900 transition group-hover:text-sky-700">Build your student edge</div>
+              <div className="font-display text-lg font-bold uppercase tracking-[0.18em] text-sky-700 leading-none">Student AI</div>
+              <div className="font-display text-sm font-semibold text-slate-500 transition group-hover:text-sky-600 mt-1">Build your student edge</div>
             </div>
           </Link>
 

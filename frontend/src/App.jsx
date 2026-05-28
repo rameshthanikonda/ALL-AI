@@ -14,6 +14,7 @@ import Internships from './pages/Internships'
 import Privacy from './pages/Privacy'
 import Profile from './pages/Profile'
 import Terms from './pages/Terms'
+import Disclaimer from './pages/Disclaimer'
 import ToolDetail from './pages/ToolDetail'
 import ToolsList from './pages/ToolsList'
 import AdminImport from './pages/AdminImport'
@@ -60,6 +61,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/admin/import" element={<AdminImport />} />
             <Route path="/admin/review" element={<AdminReview />} />
           </Routes>
