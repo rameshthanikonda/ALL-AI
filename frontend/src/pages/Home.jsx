@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ToolCard from '../components/ToolCard'
 import { useUser } from '../contexts/UserContext'
-import { bootstrapPortalContent, fetchPortalOverview } from '../services/api'
+import { fetchPortalOverview } from '../services/api'
 
 export default function Home() {
   const { user } = useUser() || {}
@@ -16,15 +16,7 @@ export default function Home() {
       setError(null)
 
       try {
-        let data = await fetchPortalOverview()
-
-        const toolsCount = Number(data?.stats?.tools || 0)
-
-        if (toolsCount === 0) {
-          await bootstrapPortalContent()
-          data = await fetchPortalOverview()
-        }
-
+        const data = await fetchPortalOverview()
         if (!mounted) return
         setOverview(data)
       } catch (err) {

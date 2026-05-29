@@ -8,7 +8,7 @@ import { fetchTools } from '../services/api'
 export default function ToolsList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [tools, setTools] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [facets, setFacets] = useState({ categories: [], tags: [] })
   const [searchPresentation, setSearchPresentation] = useState(null)

@@ -10,23 +10,35 @@ const {
   needsWebDiscovery,
   mergeDiscoveryResults,
 } = require('../search/searchPresentation')
+const { cache } = require('../services/memoryCache')
 
-async function augmentWithDiscovery(localTools, query) {
+// Cache TTLs
+const TOOLS_CACHE_TTL = 2 * 60 * 1000   // 2 minutes for tool list
+const FACETS_CACHE_TTL = 5 * 60 * 1000  // 5 minutes for facets
+
+/**
+ * Fire-and-forget web discovery in background.
+ * Results are cached so the NEXT request benefits — the current one doesn't wait.
+ */
+function triggerBackgroundDiscovery(localTools, query) {
   const q = String(query || '').trim()
-  if (!q) return { tools: localTools, usedDiscovery: false }
+  if (!q) return
 
   const shouldDiscover = localTools.length === 0 || needsWebDiscovery(localTools, q)
-  if (!shouldDiscover) return { tools: localTools, usedDiscovery: false }
+  if (!shouldDiscover) return
 
-  const discovered = await performLiveFallbackSearch(q)
-  if (!discovered.length) return { tools: localTools, usedDiscovery: false }
-
-  const merged =
-    localTools.length === 0
-      ? discovered
-      : mergeDiscoveryResults(localTools, discovered, q)
-
-  return { tools: filterCatalogTools(merged), usedDiscovery: true }
+  // Run in background — never block the response
+  performLiveFallbackSearch(q)
+    .then((discovered) => {
+      if (discovered.length) {
+        // Invalidate cache so next request picks up new tools
+        cache.invalidatePrefix('tools:')
+        console.log(`[Discovery] Background found ${discovered.length} tools for "${q}"`)
+      }
+    })
+    .catch((err) => {
+      console.warn(`[Discovery] Background failed for "${q}":`, err.message)
+    })
 }
 
 function attachSearchPresentation(searchMetadata, { q, category, tags, total }) {
@@ -110,6 +122,18 @@ function compareTools(left, right, normalizedQuery = '') {
   return leftName.localeCompare(rightName)
 }
 
+/**
+ * Load tools from DB with caching.
+ */
+async function loadAllTools() {
+  const cached = cache.get('tools:all')
+  if (cached) return cached
+
+  const tools = filterCatalogTools(await Tool.find({}).lean())
+  cache.set('tools:all', tools, TOOLS_CACHE_TTL)
+  return tools
+}
+
 async function applyFallbackSearch(tools, { query, category, tags, page, perPage }) {
   const normalizedQuery = String(query || '').trim()
 
@@ -146,16 +170,25 @@ router.get('/', async (req, res) => {
     const page = Math.max(1, Number(req.query.page) || 1)
     const perPage = Math.min(500, Math.max(1, Number(req.query.perPage) || 20))
 
-    const tools = filterCatalogTools(await Tool.find({}).lean())
-    const facets = buildFacets(tools)
+    const tools = await loadAllTools()
 
+    // Build facets (cached separately for longer)
+    let facets = cache.get('tools:facets')
+    if (!facets) {
+      facets = buildFacets(tools)
+      cache.set('tools:facets', facets, FACETS_CACHE_TTL)
+    }
+
+    // Try MeiliSearch (sync in background, don't block)
     if (meiliSearchClient.isConfigured()) {
-      await meiliSearchClient.syncIfNeeded(tools)
+      // Don't await sync — let it happen in background
+      meiliSearchClient.syncIfNeeded(tools).catch(() => {})
+
       const searchResult = await meiliSearchClient.search({ query: q, category, tags, page, perPage })
       if (searchResult) {
-        let finalTools = filterCatalogTools(searchResult.tools)
-        let finalTotal = finalTools.length || searchResult.total
-        let searchMetadata = {
+        const finalTools = filterCatalogTools(searchResult.tools)
+        const finalTotal = finalTools.length || searchResult.total
+        const searchMetadata = {
           engine: 'Meilisearch',
           strategy: q
             ? 'Keyword search across name, description, category, and tags'
@@ -164,18 +197,8 @@ router.get('/', async (req, res) => {
           filters: { category, tags },
         }
 
-        const augmented = await augmentWithDiscovery(finalTools, q)
-        finalTools = augmented.tools
-        if (augmented.usedDiscovery) {
-          searchMetadata = {
-            engine: 'Discovery',
-            strategy: 'Google + Toolify + Futurepedia',
-            query: q,
-            filters: { category, tags },
-          }
-        }
-
-        finalTotal = finalTools.length
+        // Trigger discovery in background (non-blocking) only if there's a query
+        if (q) triggerBackgroundDiscovery(finalTools, q)
 
         return res.json({
           tools: finalTools,
@@ -192,9 +215,9 @@ router.get('/', async (req, res) => {
     }
 
     const fallbackResult = await applyFallbackSearch(tools, { query: q, category, tags, page, perPage })
-    let finalTools = filterCatalogTools(fallbackResult.tools)
-    let finalTotal = finalTools.length || fallbackResult.total
-    let searchMetadata = {
+    const finalTools = filterCatalogTools(fallbackResult.tools)
+    const finalTotal = finalTools.length || fallbackResult.total
+    const searchMetadata = {
       engine: 'Database fallback',
       strategy: q
         ? 'Scored keyword search across name, description, category, and tags'
@@ -203,18 +226,8 @@ router.get('/', async (req, res) => {
       filters: { category, tags },
     }
 
-    const augmented = await augmentWithDiscovery(finalTools, q)
-    finalTools = augmented.tools
-    if (augmented.usedDiscovery) {
-      searchMetadata = {
-        engine: 'Discovery',
-        strategy: 'Google + Toolify + Futurepedia',
-        query: q,
-        filters: { category, tags },
-      }
-    }
-
-    finalTotal = finalTools.length
+    // Trigger discovery in background (non-blocking) only if there's a query
+    if (q) triggerBackgroundDiscovery(finalTools, q)
 
     res.json({
       tools: finalTools,
@@ -236,7 +249,7 @@ router.get('/', async (req, res) => {
 // Returns list of categories with counts
 router.get('/categories', async (req, res) => {
   try {
-    const tools = await Tool.find({}).lean()
+    const tools = await loadAllTools()
     const counts = tools.reduce((acc, t) => {
       const c = String(t.category || '').trim()
       if (!c) return acc
@@ -273,6 +286,9 @@ router.post('/', ensureAuth, async (req, res) => {
     if (existing) return res.status(409).json({ error: 'slug_exists' })
 
     const tool = await Tool.create({ name, slug, description, url, category, tags, logoUrl, featured })
+
+    // Invalidate cache after mutation
+    cache.invalidatePrefix('tools:')
 
     await meiliSearchClient.upsertTool(tool).catch((error) => {
       console.warn('Meilisearch upsert failed after create:', error.message)
@@ -336,6 +352,9 @@ router.post('/bulk', ensureAuth, async (req, res) => {
       results.push({ slug, status: 'upserted' })
     }
 
+    // Invalidate cache after mutation
+    cache.invalidatePrefix('tools:')
+
     // Attempt to sync to search index in background
     const allTools = await Tool.find({}).lean()
     await meiliSearchClient.syncIfNeeded(allTools).catch(() => {})
@@ -353,6 +372,9 @@ router.put('/:slug', ensureAuth, async (req, res) => {
     const tool = await Tool.findOneAndUpdate({ slug: req.params.slug }, { $set: updates }, { new: true })
     if (!tool) return res.status(404).json({ error: 'not_found' })
 
+    // Invalidate cache after mutation
+    cache.invalidatePrefix('tools:')
+
     await meiliSearchClient.upsertTool(tool).catch((error) => {
       console.warn('Meilisearch upsert failed after update:', error.message)
     })
@@ -368,6 +390,9 @@ router.delete('/:slug', ensureAuth, async (req, res) => {
   try {
     const result = await Tool.findOneAndDelete({ slug: req.params.slug })
     if (!result) return res.status(404).json({ error: 'not_found' })
+
+    // Invalidate cache after mutation
+    cache.invalidatePrefix('tools:')
 
     await meiliSearchClient.deleteTool(String(result._id)).catch((error) => {
       console.warn('Meilisearch delete failed after delete:', error.message)
