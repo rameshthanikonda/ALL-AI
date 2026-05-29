@@ -3,6 +3,7 @@ const router = express.Router()
 const Tool = require('../models/Tool')
 const { meiliSearchClient } = require('../search/meiliSearch')
 const { performLiveFallbackSearch } = require('../search/liveSearch')
+const { searchToolsInMemory, searchToolsWithTextIndex } = require('../search/databaseSearch')
 
 const PRIORITY_TOOL_ORDER = [
   'Windsurf',
@@ -74,50 +75,32 @@ function compareTools(left, right, normalizedQuery = '') {
   return leftName.localeCompare(rightName)
 }
 
-function applyFallbackSearch(tools, { query, category, tags, page, perPage }) {
-  const normalizedQuery = String(query || '').trim().toLowerCase()
-  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean)
+async function applyFallbackSearch(tools, { query, category, tags, page, perPage }) {
+  const normalizedQuery = String(query || '').trim()
 
-  let filtered = tools.filter((tool) => {
-    if (category && String(tool.category || '').trim() !== category) return false
-
-    if (tags.length) {
-      const toolTags = (tool.tags || []).map((tag) => String(tag).trim())
-      if (!tags.every((tag) => toolTags.includes(tag))) return false
+  if (normalizedQuery) {
+    try {
+      const textResult = await searchToolsWithTextIndex(Tool, {
+        query: normalizedQuery,
+        category,
+        tags,
+        page,
+        perPage,
+      })
+      if (textResult && textResult.total > 0) return textResult
+    } catch (err) {
+      console.warn('MongoDB text search unavailable:', err.message)
     }
+  }
 
-    if (!normalizedQuery) return true
-
-    const haystack = [
-      tool.name,
-      tool.description,
-      tool.category,
-      ...(tool.tags || []),
-      tool.slug,
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase()
-
-    return queryTerms.every((term) => haystack.includes(term))
+  return searchToolsInMemory(tools, {
+    query: normalizedQuery,
+    category,
+    tags,
+    page,
+    perPage,
+    compareTools,
   })
-
-  filtered = filtered.sort((left, right) => compareTools(left, right, normalizedQuery))
-
-  const total = filtered.length
-  const paged = filtered.slice((page - 1) * perPage, page * perPage).map((tool) => ({
-    ...tool,
-    _search: {
-      score: 0,
-      engine: 'Database fallback',
-      strategy: normalizedQuery
-        ? 'Basic keyword search across name, description, category, and tags'
-        : 'Browse ranking',
-      reasons: normalizedQuery ? ['keyword match'] : ['sorted for browsing'],
-    },
-  }))
-
-  return { total, tools: paged }
 }
 
 router.get('/', async (req, res) => {
@@ -152,10 +135,10 @@ router.get('/', async (req, res) => {
             finalTools = liveResults
             finalTotal = liveResults.length
             searchMetadata = {
-              engine: 'Live Web Search',
-              strategy: 'Real-time scraping fallback',
+              engine: 'AI Directory Search',
+              strategy: 'Futurepedia directory scraping when index has no matches',
               query: q,
-              filters: { category, tags }
+              filters: { category, tags },
             }
           }
         }
@@ -169,13 +152,13 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const fallbackResult = applyFallbackSearch(tools, { query: q, category, tags, page, perPage })
+    const fallbackResult = await applyFallbackSearch(tools, { query: q, category, tags, page, perPage })
     let finalTools = fallbackResult.tools
     let finalTotal = fallbackResult.total
     let searchMetadata = {
       engine: 'Database fallback',
       strategy: q
-        ? 'Basic keyword search across name, description, category, and tags'
+        ? 'Scored keyword search across name, description, category, and tags'
         : 'Simple browse ranking',
       query: q,
       filters: { category, tags },
@@ -187,10 +170,10 @@ router.get('/', async (req, res) => {
         finalTools = liveResults
         finalTotal = liveResults.length
         searchMetadata = {
-          engine: 'Live Web Search',
-          strategy: 'Real-time scraping fallback',
+          engine: 'AI Directory Search',
+          strategy: 'Futurepedia directory scraping when index has no matches',
           query: q,
-          filters: { category, tags }
+          filters: { category, tags },
         }
       }
     }

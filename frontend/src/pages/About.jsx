@@ -23,7 +23,7 @@ export default function About() {
           },
           {
             title: 'Search-First Speed',
-            description: 'Students are busy. Our application features an advanced real-time hybrid search engine with live web scraping fallbacks so you can find the exact product you need in seconds.',
+            description: 'Students are busy. Our application features hybrid search across your local tool index, with AI directory discovery from curated sources when nothing matches locally.',
             icon: '⚡'
           },
           {

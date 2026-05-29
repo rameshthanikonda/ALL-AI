@@ -24,17 +24,8 @@
     "slugify": "^1.6.9"
   },
   "devDependencies": {
-    "cross-env": "7.0.3",
-    "jest": "29.6.1",
-    "mongodb-memory-server": "11.1.0",
     "nodemon": "3.1.14",
-    "prettier": "2.8.8",
-    "supertest": "^6.3.3"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "globalSetup": "<rootDir>/tests/jest.setup.js",
-    "testTimeout": 20000
+    "prettier": "2.8.8"
   },
   "scripts": {
     "start": "node src/server.js",
@@ -54,7 +45,6 @@
     "scrape:futurepedia": "node src/scripts/runScrapingAutomation.js --scraper futurepedia",
     "scrape:github": "node src/scripts/runScrapingAutomation.js --scraper github",
     "scrape:producthunt": "node src/scripts/runScrapingAutomation.js --scraper producthunt",
-    "test": "cross-env NODE_ENV=test jest --runInBand || jest --runInBand",
     "format": "prettier --write ."
   }
 }
