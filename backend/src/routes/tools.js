@@ -5,6 +5,40 @@ const { meiliSearchClient } = require('../search/meiliSearch')
 const { performLiveFallbackSearch } = require('../search/liveSearch')
 const { searchToolsInMemory, searchToolsWithTextIndex } = require('../search/databaseSearch')
 const { filterCatalogTools } = require('../search/catalogFilter')
+const {
+  buildSearchPresentation,
+  needsWebDiscovery,
+  mergeDiscoveryResults,
+} = require('../search/searchPresentation')
+
+async function augmentWithDiscovery(localTools, query) {
+  const q = String(query || '').trim()
+  if (!q) return { tools: localTools, usedDiscovery: false }
+
+  const shouldDiscover = localTools.length === 0 || needsWebDiscovery(localTools, q)
+  if (!shouldDiscover) return { tools: localTools, usedDiscovery: false }
+
+  const discovered = await performLiveFallbackSearch(q)
+  if (!discovered.length) return { tools: localTools, usedDiscovery: false }
+
+  const merged =
+    localTools.length === 0
+      ? discovered
+      : mergeDiscoveryResults(localTools, discovered, q)
+
+  return { tools: filterCatalogTools(merged), usedDiscovery: true }
+}
+
+function attachSearchPresentation(searchMetadata, { q, category, tags, total }) {
+  const presentation = buildSearchPresentation({
+    query: q,
+    category,
+    tags,
+    total,
+    engine: searchMetadata.engine,
+  })
+  return { ...searchMetadata, presentation }
+}
 
 const PRIORITY_TOOL_ORDER = [
   'Windsurf',
@@ -130,27 +164,29 @@ router.get('/', async (req, res) => {
           filters: { category, tags },
         }
 
-        if (q && finalTools.length === 0) {
-          const liveResults = await performLiveFallbackSearch(q)
-          if (liveResults.length > 0) {
-            finalTools = liveResults
-            finalTotal = liveResults.length
-            searchMetadata = {
-              engine: 'Discovery',
-              strategy: 'Google scrape + Toolify + Futurepedia when index has no matches',
-              query: q,
-              filters: { category, tags },
-            }
+        const augmented = await augmentWithDiscovery(finalTools, q)
+        finalTools = augmented.tools
+        if (augmented.usedDiscovery) {
+          searchMetadata = {
+            engine: 'Discovery',
+            strategy: 'Google + Toolify + Futurepedia',
+            query: q,
+            filters: { category, tags },
           }
         }
 
-        finalTools = filterCatalogTools(finalTools)
+        finalTotal = finalTools.length
 
         return res.json({
           tools: finalTools,
           total: finalTotal,
           facets,
-          search: searchMetadata,
+          search: attachSearchPresentation(searchMetadata, {
+            q,
+            category,
+            tags,
+            total: finalTotal,
+          }),
         })
       }
     }
@@ -167,27 +203,29 @@ router.get('/', async (req, res) => {
       filters: { category, tags },
     }
 
-    if (q && finalTools.length === 0) {
-      const liveResults = await performLiveFallbackSearch(q)
-      if (liveResults.length > 0) {
-        finalTools = liveResults
-        finalTotal = liveResults.length
-        searchMetadata = {
-          engine: 'Discovery',
-          strategy: 'Google scrape + Toolify + Futurepedia when database has no matches',
-          query: q,
-          filters: { category, tags },
-        }
+    const augmented = await augmentWithDiscovery(finalTools, q)
+    finalTools = augmented.tools
+    if (augmented.usedDiscovery) {
+      searchMetadata = {
+        engine: 'Discovery',
+        strategy: 'Google + Toolify + Futurepedia',
+        query: q,
+        filters: { category, tags },
       }
     }
 
-    finalTools = filterCatalogTools(finalTools)
+    finalTotal = finalTools.length
 
     res.json({
       tools: finalTools,
       total: finalTotal,
       facets,
-      search: searchMetadata,
+      search: attachSearchPresentation(searchMetadata, {
+        q,
+        category,
+        tags,
+        total: finalTotal,
+      }),
     })
   } catch (err) {
     console.error(err)

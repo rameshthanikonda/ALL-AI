@@ -1,6 +1,8 @@
 const BLOCKED_NAME_PATTERNS = [
   /cache-control/i,
   /http\s+header/i,
+  /\bheader\b/i,
+  /\bspec\b/i,
   /^\s*what is /i,
   /documentation/i,
   /specification/i,

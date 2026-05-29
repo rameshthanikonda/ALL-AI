@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
+import SearchResultsBanner from '../components/SearchResultsBanner'
 import ToolCard from '../components/ToolCard'
 import { fetchTools } from '../services/api'
 
@@ -10,6 +11,7 @@ export default function ToolsList() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [facets, setFacets] = useState({ categories: [], tags: [] })
+  const [searchPresentation, setSearchPresentation] = useState(null)
 
   const q = searchParams.get('q') || ''
   const category = searchParams.get('category') || ''
@@ -23,10 +25,12 @@ export default function ToolsList() {
       const data = await fetchTools({ ...params, perPage: 500 })
       setTools(data.tools || [])
       setFacets(data.facets || { categories: [], tags: [] })
+      setSearchPresentation(data.search?.presentation || null)
     } catch (err) {
       console.error('Load tools error', err)
       setError(err)
       setTools([])
+      setSearchPresentation(null)
     } finally {
       setLoading(false)
     }
@@ -66,10 +70,8 @@ export default function ToolsList() {
         onSearch={runSearch}
       />
 
-      {!loading && !error && tools.length > 0 && (
-        <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
-          Showing <span className="font-semibold text-slate-900">{tools.length}</span> AI tools ranked by relevance, with leading platforms surfaced first.
-        </div>
+      {(loading || searchPresentation) && (
+        <SearchResultsBanner presentation={searchPresentation} loading={loading} query={q} />
       )}
 
       {loading && (
@@ -83,12 +85,17 @@ export default function ToolsList() {
       {error && <div className="text-red-600">Error loading tools: {error.message || 'unknown'}</div>}
 
       {!loading && !error && tools.length === 0 && (
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 text-slate-600">
-          No tools matched your search. Try a broader term or remove one of the filters.
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-slate-600">
+          <p className="text-lg font-medium text-slate-900">No tools found</p>
+          <p className="mt-2 text-sm">
+            {q
+              ? `We could not find AI tools for “${q}”. Try a shorter keyword or a different category.`
+              : 'Try clearing filters or browse the full catalog.'}
+          </p>
         </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && tools.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {tools.map((tool) => (
             <ToolCard key={tool._id || tool.id || tool.slug} {...tool} />
