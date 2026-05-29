@@ -35,6 +35,11 @@ async function createApp() {
   } else if (process.env.NODE_ENV !== 'test') {
     const db = await connectDB()
     sessionMongoUrl = db.mongoUri
+
+    const { purgeLegacySearchTools } = require('./search/purgeLegacyTools')
+    purgeLegacySearchTools().catch((error) => {
+      console.warn('[Catalog] Legacy purge skipped:', error.message)
+    })
   }
 
   console.log(

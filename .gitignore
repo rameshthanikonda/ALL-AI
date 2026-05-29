@@ -12,6 +12,8 @@ frontend/dist/
 
 # Logs
 *.log
+backend/backend.err.log
+backend/backend.out.log
 
 # Python cache
 __pycache__/

@@ -21,7 +21,7 @@ npm install
 npm run dev
 ```
 
-Set up `.env` based on `.env.example` before running backend.
+Create a `backend/.env` with `MONGO_URI`, `SESSION_SECRET`, and optional OAuth/search keys before running the backend.
 
 Seeding sample data (after installing backend deps):
 

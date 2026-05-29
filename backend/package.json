@@ -45,6 +45,7 @@
     "scrape:futurepedia": "node src/scripts/runScrapingAutomation.js --scraper futurepedia",
     "scrape:github": "node src/scripts/runScrapingAutomation.js --scraper github",
     "scrape:producthunt": "node src/scripts/runScrapingAutomation.js --scraper producthunt",
+    "cleanup:tools": "node src/scripts/cleanupNoisyTools.js",
     "format": "prettier --write ."
   }
 }

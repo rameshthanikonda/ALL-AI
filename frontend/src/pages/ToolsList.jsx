@@ -68,8 +68,7 @@ export default function ToolsList() {
 
       {!loading && !error && tools.length > 0 && (
         <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
-          Showing <span className="font-semibold text-slate-900">{tools.length}</span> tools with the main platforms first,
-          so users notice the strongest options quickly while still being able to browse the full catalog.
+          Showing <span className="font-semibold text-slate-900">{tools.length}</span> AI tools ranked by relevance, with leading platforms surfaced first.
         </div>
       )}
 

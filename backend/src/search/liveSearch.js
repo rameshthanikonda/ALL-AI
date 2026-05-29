@@ -1,10 +1,10 @@
 const Tool = require('../models/Tool')
 const { cleanToolRecord } = require('../automation/processors/dataCleaner')
 const { categorizeTool } = require('../automation/categorizer/keywordCategorizer')
-const { searchAiToolDirectories } = require('./directorySearch')
-const { rankToolsByQuery } = require('./queryUtils')
+const { discoverTools } = require('./discoveryService')
+const { filterValidTools } = require('./toolValidator')
 
-function toApiTool(cleaned, query, sourceLabel) {
+function toApiTool(cleaned, query) {
   return {
     name: cleaned.name,
     slug: cleaned.slug,
@@ -18,74 +18,57 @@ function toApiTool(cleaned, query, sourceLabel) {
     source: cleaned.source,
     featured: false,
     _search: {
-      engine: sourceLabel,
-      strategy: 'AI directory scraping (Futurepedia)',
-      reasons: ['No local index match', `query: ${query}`],
+      engine: 'Discovery',
+      strategy: 'Google scrape + Toolify + Futurepedia',
+      reasons: ['No local match', `query: ${query}`],
     },
   }
 }
 
-/**
- * Discover AI tools by scraping curated directories instead of generic web search engines.
- */
 async function performLiveFallbackSearch(query) {
   const trimmed = String(query || '').trim()
   if (!trimmed) return []
 
-  console.log(`[LiveSearch] Directory discovery for: ${trimmed}`)
+  const discovered = await discoverTools(trimmed)
+  if (!discovered.length) return []
 
-  try {
-    const rawResults = await searchAiToolDirectories(trimmed)
-    if (!rawResults.length) {
-      console.log(`[LiveSearch] No directory results for: ${trimmed}`)
-      return []
+  const apiTools = []
+  for (const raw of discovered) {
+    const cleaned = cleanToolRecord(raw)
+    if (!cleaned) continue
+
+    if (!cleaned.category || cleaned.category === 'Uncategorized') {
+      cleaned.category = categorizeTool(cleaned.name, cleaned.description, cleaned.tags)
     }
 
-    const apiTools = []
-    for (const raw of rawResults) {
-      const cleaned = cleanToolRecord(raw)
-      if (!cleaned) continue
-
-      if (!cleaned.category) {
-        cleaned.category = categorizeTool(cleaned.name, cleaned.description, cleaned.tags)
-      }
-
-      apiTools.push(toApiTool(cleaned, trimmed, 'AI Directory Search'))
-    }
-
-    const ranked = rankToolsByQuery(apiTools, trimmed, 10)
-    if (ranked.length > 0) {
-      await cacheAndSaveResults(ranked)
-      console.log(`[LiveSearch] Returning ${ranked.length} directory tools for "${trimmed}"`)
-      return ranked
-    }
-  } catch (err) {
-    console.error(`[LiveSearch] Directory search failed:`, err.message)
+    apiTools.push(toApiTool(cleaned, trimmed))
   }
 
-  return []
+  const valid = filterValidTools(apiTools)
+  if (!valid.length) return []
+
+  await cacheDiscoveredTools(valid)
+  return valid
 }
 
-/**
- * Persist discovered tools so later searches hit the local database.
- */
-async function cacheAndSaveResults(results) {
-  for (const res of results) {
+async function cacheDiscoveredTools(results) {
+  for (const tool of results) {
     try {
-      const { _search, ...toolData } = res
+      const { _search, ...toolData } = tool
+      const normalizedName = String(toolData.name || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '')
+
       const existing = await Tool.findOne({
-        $or: [{ slug: toolData.slug }, { url: toolData.url }, { normalizedName: toolData.name?.toLowerCase?.().replace(/[^a-z0-9]/g, '') }],
+        $or: [{ slug: toolData.slug }, { url: toolData.url }, { normalizedName }],
       })
 
       if (!existing) {
-        const normalizedName = String(toolData.name || '')
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, '')
         await Tool.create({ ...toolData, normalizedName })
-        console.log(`[LiveSearch] Saved new tool: ${toolData.name} (${toolData.slug})`)
+        console.log(`[GoogleScrape] Saved: ${toolData.name}`)
       }
-    } catch (err) {
-      console.warn('[LiveSearch] Failed to cache result:', err.message)
+    } catch (error) {
+      console.warn('[GoogleScrape] Cache failed:', error.message)
     }
   }
 }

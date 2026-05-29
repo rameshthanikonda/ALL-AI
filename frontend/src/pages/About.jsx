@@ -23,7 +23,7 @@ export default function About() {
           },
           {
             title: 'Search-First Speed',
-            description: 'Students are busy. Our application features hybrid search across your local tool index, with AI directory discovery from curated sources when nothing matches locally.',
+            description: 'Students are busy. Our application features hybrid search across your local tool index, with Google scraping plus Toolify and Futurepedia discovery when nothing matches locally.',
             icon: '⚡'
           },
           {

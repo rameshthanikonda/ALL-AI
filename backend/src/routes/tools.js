@@ -4,6 +4,7 @@ const Tool = require('../models/Tool')
 const { meiliSearchClient } = require('../search/meiliSearch')
 const { performLiveFallbackSearch } = require('../search/liveSearch')
 const { searchToolsInMemory, searchToolsWithTextIndex } = require('../search/databaseSearch')
+const { filterCatalogTools } = require('../search/catalogFilter')
 
 const PRIORITY_TOOL_ORDER = [
   'Windsurf',
@@ -111,15 +112,15 @@ router.get('/', async (req, res) => {
     const page = Math.max(1, Number(req.query.page) || 1)
     const perPage = Math.min(500, Math.max(1, Number(req.query.perPage) || 20))
 
-    const tools = await Tool.find({}).lean()
+    const tools = filterCatalogTools(await Tool.find({}).lean())
     const facets = buildFacets(tools)
 
     if (meiliSearchClient.isConfigured()) {
       await meiliSearchClient.syncIfNeeded(tools)
       const searchResult = await meiliSearchClient.search({ query: q, category, tags, page, perPage })
       if (searchResult) {
-        let finalTools = searchResult.tools
-        let finalTotal = searchResult.total
+        let finalTools = filterCatalogTools(searchResult.tools)
+        let finalTotal = finalTools.length || searchResult.total
         let searchMetadata = {
           engine: 'Meilisearch',
           strategy: q
@@ -129,19 +130,21 @@ router.get('/', async (req, res) => {
           filters: { category, tags },
         }
 
-        if (finalTotal === 0 && q) {
+        if (q && finalTools.length === 0) {
           const liveResults = await performLiveFallbackSearch(q)
           if (liveResults.length > 0) {
             finalTools = liveResults
             finalTotal = liveResults.length
             searchMetadata = {
-              engine: 'AI Directory Search',
-              strategy: 'Futurepedia directory scraping when index has no matches',
+              engine: 'Discovery',
+              strategy: 'Google scrape + Toolify + Futurepedia when index has no matches',
               query: q,
               filters: { category, tags },
             }
           }
         }
+
+        finalTools = filterCatalogTools(finalTools)
 
         return res.json({
           tools: finalTools,
@@ -153,8 +156,8 @@ router.get('/', async (req, res) => {
     }
 
     const fallbackResult = await applyFallbackSearch(tools, { query: q, category, tags, page, perPage })
-    let finalTools = fallbackResult.tools
-    let finalTotal = fallbackResult.total
+    let finalTools = filterCatalogTools(fallbackResult.tools)
+    let finalTotal = finalTools.length || fallbackResult.total
     let searchMetadata = {
       engine: 'Database fallback',
       strategy: q
@@ -164,19 +167,21 @@ router.get('/', async (req, res) => {
       filters: { category, tags },
     }
 
-    if (finalTotal === 0 && q) {
+    if (q && finalTools.length === 0) {
       const liveResults = await performLiveFallbackSearch(q)
       if (liveResults.length > 0) {
         finalTools = liveResults
         finalTotal = liveResults.length
         searchMetadata = {
-          engine: 'AI Directory Search',
-          strategy: 'Futurepedia directory scraping when index has no matches',
+          engine: 'Discovery',
+          strategy: 'Google scrape + Toolify + Futurepedia when database has no matches',
           query: q,
           filters: { category, tags },
         }
       }
     }
+
+    finalTools = filterCatalogTools(finalTools)
 
     res.json({
       tools: finalTools,
